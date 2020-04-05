@@ -1,4 +1,0 @@
-[
-  "id": "whatever",
-  "name": "start"
-]
