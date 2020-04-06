@@ -142,40 +142,5 @@ function findArticlesByAuthor(author) {
 }
 
 
-function findArticlesByKeyword(keyword) {
-    let results = [];
-    if (keyword === null) {
-        return results;
-    }
-    articles.forEach(article => {
 
-	article.keywords.forEach(db_keyword => {
-	        if (keyword.toLowerCase() == db_keyword.toLowerCase()) {
-            		results.push(article);
-        	}	
-	})
-
-    });
-    return results;
-}
-
-
-function findArticlesByDate(date) {
-    let results = [];
-    if (date === null) {
-
-        return results;
-    }
-    articles.forEach(article => {
-	var articleDate = new Date(article.released);
-    	date = new Date(date);
-        if (articleDate.getFullYear() == date.getFullYear() && articleDate.getMonth() == date.getMonth() && articleDate.getDate() == date.getDate()) {
-            results.push(article);
-        }
-    });
-    return results;
-}
-
-
-
-export {findArticlesByAuthor, findArticlesByKeyword, findArticlesByDate};
+export {findArticlesByAuthor};
