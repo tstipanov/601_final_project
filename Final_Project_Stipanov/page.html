@@ -1,0 +1,506 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>K2 Analytics</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="Real estate software that expresses rent roll in an easy-to-understand and digestable way.">
+	<meta name="author" content="Tom Stipanov">
+	<!-- css -->
+	<link href="css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="css/style.css" rel="stylesheet">
+	<!-- skin color -->
+	<link href="color/default.css" rel="stylesheet">
+	<!-- Favicon -->
+	<link rel="shortcut icon" href="img/firelogo2.png">
+	<link rel="stylesheet" src="extensions/fixed-columns/bootstrap-table-fixed-columns.css">
+	<!-- jQuery -->
+	<script src="js/jquery.js"></script>
+	<!-- nav -->
+	<script src="js/jquery.scrollTo.js"></script>
+	<script src="js/jquery.nav.js"></script>
+	<!-- localScroll -->
+	<script src="js/jquery.localScroll.js"></script>
+	<!-- bootstrap -->
+	<script src="js/bootstrap.js"></script>
+	<!-- prettyPhoto -->
+	<script src="js/jquery.prettyPhoto.js"></script>
+	<!-- Works scripts -->
+	<script src="js/isotope.js"></script>
+	<!-- flexslider -->
+	<script src="js/jquery.flexslider.js"></script>
+	<!-- inview -->
+	<script src="js/inview.js"></script>
+	<!-- animation -->
+	<script src="js/animate.js"></script>
+	<!-- custom functions -->
+	<script src="js/custom.js"></script>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+	<!-- Final project charts and tables javascript code -->
+	<script type="module">
+
+		// Import modules from my GitHub account, where they are stored in a JSON array, save to variable
+		import {findPropertiesByName} from 'https://tstipanov.github.io/601_final_project/data.js';
+		var property = null;
+		property = findPropertiesByName("Example Property"); 
+
+		// Convert the data into floats and store in variables for each 
+		var do_nothing = parseFloat(property[0].do_nothing.replace(/,/g, ''))
+		var pay_broker = parseFloat(property[0].pay_broker.replace(/,/g, '')) + do_nothing
+		var increase_rents = parseFloat(property[0].increase_rents.replace(/,/g, '')) + pay_broker
+		var find_new_tenants = parseFloat(property[0].find_new_tenants.replace(/,/g, '')) + increase_rents
+		var market_improves = parseFloat(property[0].market_improves.replace(/,/g, '')) + find_new_tenants
+		var future_leasing = parseFloat(property[0].future_leasing.replace(/,/g, '')) + market_improves
+		var turnover = parseFloat(property[0].turnover.replace(/,/g, '')) + future_leasing
+		var bad_debt = parseFloat(property[0].bad_debt.replace(/,/g, '')) + turnover
+		var improve_units = parseFloat(property[0].improve_units.replace(/,/g, '')) + bad_debt
+		var pay_leasing_broker = parseFloat(property[0].pay_leasing_broker.replace(/,/g, '')) + improve_units
+		var renovate_building = parseFloat(property[0].renovate_building.replace(/,/g, '')) + pay_leasing_broker
+		var inflation = parseFloat(property[0].inflation.replace(/,/g, '')) + renovate_building
+		var increased_expenses = parseFloat(property[0].increased_expenses.replace(/,/g, '')) + inflation
+		var brokered_auction = parseFloat(property[0].brokered_auction.replace(/,/g, '')) + increased_expenses
+		var taxes_due_at_sale = parseFloat(property[0].taxes_due_at_sale.replace(/,/g, '')) + brokered_auction
+
+		// CHART 1: Create the first candlestick chart with data from JSON data retrieved from the web
+		google.charts.load('current', {'packages':['corechart']});
+      	google.charts.setOnLoadCallback(drawWaterfallChart);
+      	function drawWaterfallChart() {
+        	var data = google.visualization.arrayToDataTable([
+				['Do Nothing', 0, 0, do_nothing, do_nothing],
+				['Pay Broker', do_nothing, do_nothing, pay_broker, pay_broker],
+				['Increase Rents', pay_broker, pay_broker, increase_rents, increase_rents],
+				["Find New Tenants", increase_rents, increase_rents, find_new_tenants, find_new_tenants],
+				["Market Improves", find_new_tenants, find_new_tenants, market_improves, market_improves],
+				["Future Leasing", market_improves, market_improves, future_leasing, future_leasing],
+				["Turnover", future_leasing, future_leasing, turnover, turnover],
+				["Improve Units", turnover, turnover, improve_units, improve_units],
+				["Pay Leasing Broker", improve_units, improve_units, pay_leasing_broker, pay_leasing_broker],
+				["Renovate Building", pay_leasing_broker, pay_leasing_broker, renovate_building, renovate_building],
+				["Inflation", renovate_building, renovate_building, inflation, inflation],
+				["Increased Expenses", inflation, inflation, increased_expenses, increased_expenses],
+				["Brokered Auction", increased_expenses, increased_expenses, brokered_auction, brokered_auction],
+				["Taxes Due at Sale", brokered_auction, brokered_auction, taxes_due_at_sale, taxes_due_at_sale]
+        	], true);
+
+		// Refine the chart options and place in the corresponding div
+        var options = {
+			legend: 'none',
+			bar: { groupWidth: '100%' }, 
+			candlestick: {
+				fallingColor: { strokeWidth: 0, fill: '#a52714' }, // red
+				risingColor: { strokeWidth: 0, fill: '#0f9d58' }   // green
+		  	},
+		  	enableInteractivity: false,
+		  	orientation: 'vertical'
+        };
+        var chart = new google.visualization.CandlestickChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+
+		// CHART 2: Create a line chart with data from JSON data retrieved from the web
+		google.charts.load('current', {'packages':['line']});
+		google.charts.setOnLoadCallback(drawLineChart);
+
+	  	// Save numerical cash flow data retrieved from the web to arrays after converting it to floats
+		var leasing = [];
+		var capital = [];
+		var cash_flows = [];
+		property[0].leasing.forEach(item => {leasing.push(-parseFloat(item.replace(/,/g, '')))});
+		property[0].capital.forEach(item => {capital.push(-parseFloat(item.replace(/,/g, '')))});
+		property[0].cash_flows.forEach(item => {cash_flows.push(parseFloat(item.replace(/,/g, '')))});
+
+	  	// The chart format requires each row in the form of a separate array; populate array with the following loop
+		var rows = []
+		var index = 0;
+		for (index = 0; index < property[0].likely_revenue.length; index++) { 
+			rows.push([index, leasing[index], capital[index], cash_flows[index]]); 
+		} 
+
+		// Create the chart with a column for each category of data in the corresponding div
+    	function drawLineChart() {
+			var data = new google.visualization.DataTable();
+			data.addColumn('number', 'Year');
+			data.addColumn('number', 'Leasing');
+			data.addColumn('number', 'Capital');
+			data.addColumn('number', 'Cash Flows');
+			data.addRows(rows);
+			var options = {
+				width: 900,
+				height: 500
+			};
+			var chart = new google.charts.Line(document.getElementById('linechart_material'));
+			chart.draw(data, google.charts.Line.convertOptions(options));
+		}
+
+		// CHART 3: Create a bar chart 
+		google.charts.load("current", {packages:["corechart"]});
+		google.charts.setOnLoadCallback(drawBarChart);
+		function drawBarChart() {
+			var data = google.visualization.arrayToDataTable([
+				['Tenant', 'Tenant 1', 'Tenant 2', 'Tenant 3', 'Tenant 4',
+				'Tenant 5', 'Tenant 6', { role: 'annotation' } ],
+				['% of Revenue', 10, 25, 20, 22, 18, 5, ''],
+			]);
+
+			// Finetune the chart formatting and place it in the corresponding div on the page
+			var options = {
+				width: 600,
+				height: 400,
+				legend: { position: 'top', maxLines: 3 },
+				bar: { groupWidth: '75%' },
+				isStacked: true
+			};
+			var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
+			chart.draw(data, options);
+		}
+
+		// CHART 4: Create an area chart with data from JSON data retrieved from the web
+		google.charts.load('current', {'packages':['corechart']});
+		google.charts.setOnLoadCallback(drawChart);
+
+		// Save numerical cash flow data retrieved from the web to arrays after converting it to floats
+		var likely_revenue = [];
+		var expenses = [];
+		property[0].likely_revenue.forEach(item => {likely_revenue.push(parseFloat(item.replace(/,/g, '')))});
+		property[0].expenses.forEach(item => {expenses.push(parseFloat(item.replace(/,/g, '')))});
+
+		// The chart format requires each row in the form of a separate array; populate array with the following loop
+		var rows_2 = [['Year', 'Revenue', 'Expenses']]
+		var index = 0;
+		for (index = 0; index < property[0].likely_revenue.length; index++) { 
+			rows_2.push([index, likely_revenue[index], expenses[index]]); 
+		} 
+
+		// Draw the chart and place it in the corresponding div
+		function drawChart() {
+		var data = google.visualization.arrayToDataTable(rows_2);
+        var options = {
+			hAxis: {title: 'Year',  titleTextStyle: {color: '#333'}},
+        };
+        var area_chart = new google.visualization.AreaChart(document.getElementById('area_chart_div'));
+		area_chart.draw(data, options);
+	};
+
+
+	// TABLE 1
+	// Step 1: Select the corresponding table row (using a specific id) to populate with data
+	var potential_revenue_html = document.querySelector("#potential_revenue");
+	var captured_rent_html = document.querySelector("#captured_rent");
+	var future_rent_html = document.querySelector("#future_rent");
+	var lost_rent_html = document.querySelector("#lost_rent");
+	var concession_html = document.querySelector("#concession");
+	var total_rent_html = document.querySelector("#total_rent");
+	var utilities_html = document.querySelector("#utilities");
+	var misc_income_html = document.querySelector("#misc_income");
+	var all_revenue_html = document.querySelector("#all_revenue");
+	var bad_debts_html = document.querySelector("#bad_debts");
+	var likely_revenue_html = document.querySelector("#likely_revenue");
+	var expenses_html = document.querySelector("#expenses");
+	var net_income_html = document.querySelector("#net_income");
+	var general_upgrades_html = document.querySelector("#general_upgrades");
+	var space_upgrades_html = document.querySelector("#space_upgrades");
+	var leasing_html = document.querySelector("#leasing");
+	var capital_html = document.querySelector("#capital");
+	var cash_flows_html = document.querySelector("#cash_flows");
+	var ownership_cash_flows_html = document.querySelector("#cash_flows");
+	var purchase_html = document.querySelector("#purchase");
+	var sale_html = document.querySelector("#sale");
+	var purchase_costs_html = document.querySelector("#purchase_costs");
+	var sale_costs_html = document.querySelector("#sale_costs");
+	var total_cash_flows_html = document.querySelector("#total_cash_flows");
+
+	// Step 2: Create strings for the html code for the table headers
+	var potential_revenue_htmlString = "<th class=\"fixed-side\">Potential Rent</th>";
+	var captured_rent_htmlString = "<th class=\"fixed-side\">Captured Rent</th>";
+	var future_rent_htmlString = "<th class=\"fixed-side\">Future Rent</th>";
+	var lost_rent_htmlString = "<th class=\"fixed-side\">Lost Rent</th>";
+	var concession_htmlString = "<th class=\"fixed-side\">Concessions</th>";
+	var total_rent_htmlString = "<th class=\"fixed-side\">Total Rent</th>";
+	var utilities_htmlString = "<th class=\"fixed-side\">Utilities</th>";
+	var misc_income_htmlString = "<th class=\"fixed-side\">Misc Income</th>";
+	var all_revenue_htmlString = "<th class=\"fixed-side\">All Revenue</th>";
+	var bad_debts_htmlString = "<th class=\"fixed-side\">Bad Debt</th>";
+	var likely_revenue_htmlString = "<th class=\"fixed-side\">Likely Revenue</th>";
+	var expenses_htmlString = "<th class=\"fixed-side\">Expenses</th>";
+	var net_income_htmlString = "<th class=\"fixed-side\">Net Income</th>";
+	var general_upgrades_htmlString = "<th class=\"fixed-side\">General Upgrades</th>";
+	var space_upgrades_htmlString = "<th class=\"fixed-side\">Space Upgrades</th>";
+	var leasing_htmlString = "<th class=\"fixed-side\">Leasing</th>";
+	var capital_htmlString = "<th class=\"fixed-side\">Capital</th>";
+	var cash_flows_htmlString = "<th class=\"fixed-side\">Cash Flows</th>";
+	var ownership_cash_flows_htmlString = "<th class=\"fixed-side\">Ownership Cash Flows</th>";
+	var purchase_htmlString = "<th class=\"fixed-side\">Purchase</th>";
+	var sale_htmlString = "<th class=\"fixed-side\">Sale</th>";
+	var purchase_costs_htmlString = "<th class=\"fixed-side\">Purchase Costs</th>";
+	var sale_costs_htmlString = "<th class=\"fixed-side\">Sale Costs</th>";
+	var total_cash_flows_htmlString = "<th class=\"fixed-side\">Total Cash Flows</th>";
+
+	// Step 3: Loop through the data and create a concatenated string with all of the data in an html tablular format
+	for (index = 0; index < property[0].potential_revenue.length; index++) { 
+		potential_revenue_htmlString += `<td>${property[0].potential_revenue[index]}</td>`;
+		captured_rent_htmlString += `<td>${property[0].captured_rent[index]}</td>`;
+		future_rent_htmlString += `<td>${property[0].future_rent[index]}</td>`;
+		lost_rent_htmlString += `<td>${property[0].lost_rent[index]}</td>`;
+		concession_htmlString += `<td>${property[0].concession[index]}</td>`;
+		total_rent_htmlString += `<td>${property[0].total_rent[index]}</td>`;
+		utilities_htmlString += `<td>${property[0].utilities[index]}</td>`;
+		misc_income_htmlString += `<td>${property[0].misc_income[index]}</td>`;
+		all_revenue_htmlString += `<td>${property[0].all_revenue[index]}</td>`;
+		bad_debts_htmlString += `<td>${property[0].bad_debts[index]}</td>`;
+		likely_revenue_htmlString += `<td>${property[0].likely_revenue[index]}</td>`;
+		expenses_htmlString += `<td>${property[0].expenses[index]}</td>`;
+		net_income_htmlString += `<td>${property[0].net_income[index]}</td>`;
+		general_upgrades_htmlString += `<td>${property[0].general_upgrades[index]}</td>`;
+		space_upgrades_htmlString += `<td>${property[0].space_upgrades[index]}</td>`;
+		leasing_htmlString += `<td>${property[0].leasing[index]}</td>`;
+		capital_htmlString += `<td>${property[0].capital[index]}</td>`;
+		cash_flows_htmlString += `<td>${property[0].cash_flows[index]}</td>`;
+		ownership_cash_flows_htmlString += `<td>${property[0].ownership_cash_flows[index]}</td>`;
+		purchase_htmlString += `<td>${property[0].purchase[index]}</td>`;
+		sale_htmlString += `<td>${property[0].sale[index]}</td>`;
+		purchase_costs_htmlString += `<td>${property[0].purchase_costs[index]}</td>`;
+		sale_costs_htmlString += `<td>${property[0].sale_costs[index]}</td>`;
+		total_cash_flows_htmlString += `<td>${property[0].total_cash_flows[index]}</td>`;
+	} 
+
+	// Step 4: Set the corresponding html table row equal to the string containing the corresponding data
+	potential_revenue_html.innerHTML = potential_revenue_htmlString; 
+	captured_rent_html.innerHTML = captured_rent_htmlString; 
+	future_rent_html.innerHTML = future_rent_htmlString; 
+	lost_rent_html.innerHTML = lost_rent_htmlString; 
+	concession_html.innerHTML = concession_htmlString; 
+	total_rent_html.innerHTML = total_rent_htmlString; 
+	misc_income_html.innerHTML = misc_income_htmlString; 
+	all_revenue_html.innerHTML = all_revenue_htmlString; 
+	bad_debts_html.innerHTML = bad_debts_htmlString; 
+	likely_revenue_html.innerHTML = likely_revenue_htmlString; 
+	expenses_html.innerHTML = expenses_htmlString; 
+	net_income_html.innerHTML = net_income_htmlString; 
+	general_upgrades_html.innerHTML = general_upgrades_htmlString; 
+	space_upgrades_html.innerHTML = space_upgrades_htmlString; 
+	leasing_html.innerHTML = leasing_htmlString; 
+	capital_html.innerHTML = capital_htmlString; 
+	cash_flows_html.innerHTML = cash_flows_htmlString; 
+	ownership_cash_flows_html.innerHTML = ownership_cash_flows_htmlString; 
+	purchase_html.innerHTML = purchase_htmlString; 
+	sale_html.innerHTML = sale_htmlString; 
+	purchase_costs_html.innerHTML = purchase_costs_htmlString; 
+	sale_costs_html.innerHTML = sale_costs_htmlString; 
+	total_cash_flows_html.innerHTML = total_cash_flows_htmlString;
+
+	// JQuery library that allows the table to scroll
+	jQuery(document).ready(function() {
+	jQuery(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');   
+	});
+
+</script>
+</head>
+<body>
+	<!-- navbar -->
+	<div class="navbar-wrapper">
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<!-- Responsive navbar -->
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+				</a>
+				<h1 class="brand"><a href="index.html"><b>K2</b></a></h1>
+					<!-- navigation -->
+					<nav class="pull-right nav-collapse collapse">
+						<ul id="menu-main" class="nav">
+							<li><a title="team" href="index.html#about">About</a></li>
+							<li><a title="works" href="index.html#works">Examples</a></li>
+							<li><a href="page.html">Property</a></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end navbar section -->
+	<!-- Property name spacer section -->
+	<section class="spacer green">
+		<div class="container">
+			<div class="row">
+				<div class="span12 aligncenter flyUp">
+					<h2 class="pagetitle">Rent Roll <strong>Analytics</strong></h2>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- end spacer section -->
+	<!-- First tabbed section with charts -->
+	<section id="maincontent" class="inner">
+		<div class="container">
+			<h1>Example Portfolio Property</h1><br>
+			<!-- start: "Accordion" tabbed section -->
+			<div class="row">
+				<div class="span12">
+					<h4>Returns Analysis</h4>
+					<div class="accordion" id="accordion2">
+						<!-- Chart 1 -->
+						<div class="accordion-group">
+							<div class="accordion-heading">
+								<a class="accordion-toggle active" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+								<i class="icon-minus"></i> Returns Analysis </a>
+							</div>
+							<div id="collapseOne" class="accordion-body collapse in">
+								<div class="accordion-inner">
+									<h6>Profit or loss resulting from various management strategies</h6>
+									<div id="chart_div" style="width: 900px; height: 500px;"></div>
+								</div>
+							</div>
+						</div>
+						<!-- Chart 2 -->
+						<div class="accordion-group">
+							<div class="accordion-heading">
+								<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+								<i class="icon-plus"></i> Cash flow Analysis </a>
+							</div>
+							<div id="collapseTwo" class="accordion-body collapse">
+								<div class="accordion-inner">
+									<h6>Impact of capital expenditures on cash flow</h6>
+									<div id="linechart_material" style="width: 900px; height: 500px;"></div>
+								</div>
+							</div>
+						</div>
+						<!-- Chart 3 -->
+						<div class="accordion-group">
+							<div class="accordion-heading">
+								<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseThree">
+								<i class="icon-plus"></i> Revenue Analysis </a>
+							</div>
+							<div id="collapseThree" class="accordion-body collapse">
+								<div class="accordion-inner">
+									<h6>Revenue breakdown by tenant</h6>
+									<div id="barchart_values" style="width: 900px; height: 300px;"></div>
+								</div>
+							</div>
+						</div>
+						<!-- Chart 4 -->
+						<div class="accordion-group">
+							<div class="accordion-heading">
+								<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseFour">
+								<i class="icon-plus"></i> Profitability Analysis </a>
+							</div>
+							<div id="collapseFour" class="accordion-body collapse">
+								<div class="accordion-inner">
+									<h6>Relationship of revenue and expenses over time</h6>
+									<div id="area_chart_div" style="width: 100%; height: 500px;"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--end: Accordion -->
+			<!-- start: second tabbed section -->
+			<div class="row">
+				<div class="span12">
+					<h4>Cash Flow Forecasts</h4>
+					<div class="tabbable">
+						<ul class="nav nav-tabs">
+							<li class="active"><a href="#one" data-toggle="tab"><i class="icon-rocket"></i> One</a></li>
+							<li><a href="#two" data-toggle="tab">Two</a></li>
+							<li><a href="#three" data-toggle="tab">Three</a></li>
+						</ul>
+						<div class="tab-content">
+							<div class="tab-pane active" id="one">
+								<div id="table-scroll" class="table-scroll">
+									<div class="table-wrap">
+									  <table class="main-table">
+										<thead>
+										  <tr>
+											<th class="fixed-side" scope="col">&nbsp;</th>
+											<th scope="col">Year 1</th>
+											<th scope="col">Year 2</th>
+											<th scope="col">Year 3</th>
+											<th scope="col">Year 4</th>
+											<th scope="col">Year 5</th>
+											<th scope="col">Year 6</th>
+											<th scope="col">Year 7</th>
+											<th scope="col">Year 8</th>
+											<th scope="col">Year 9</th>
+											<th scope="col">Year 10</th>
+											<th scope="col">Year 11</th>
+											<th scope="col">Year 12</th>
+											<th scope="col">Year 13</th>
+											<th scope="col">Year 14</th>
+											<th scope="col">Year 15</th>
+											<th scope="col">Year 16</th>
+											<th scope="col">Year 17</th>
+										  </tr>
+										</thead>
+										<tbody>
+										  <tr id="potential_revenue"> </tr>
+										  <tr id="captured_rent"> </tr>
+										  <tr id="future_rent"> </tr>
+										  <tr id="lost_rent"> </tr>
+										  <tr id="concession"> </tr>
+										  <tr id="total_rent"> </tr>
+										  <tr id="utilities"> </tr>
+										  <tr id="misc_income"> </tr>
+										  <tr id="all_revenue"> </tr>
+										  <tr id="bad_debts"> </tr>
+										  <tr id="likely_revenue"> </tr>
+										  <tr id="expenses"> </tr>
+										  <tr id="net_income"> </tr>
+										  <tr id="general_upgrades"> </tr>
+										  <tr id="space_upgrades"> </tr>
+										  <tr id="leasing"> </tr>
+										  <tr id="capital"> </tr>
+										  <tr id="cash_flows"> </tr>
+										  <tr id="ownership_cash_flows"> </tr>
+										  <tr id="purchase"> </tr>
+										  <tr id="sale"> </tr>
+										  <tr id="purchase_costs"> </tr>
+										  <tr id="sale_costs"> </tr>
+										  <tr id="total_cash_flows"> </tr>
+										</tbody>
+									  </table>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane" id="two">
+								<p>
+									Another section for quarterly cash flows.
+								</p>
+							</div>
+							<div class="tab-pane" id="three">
+								<p>
+									Another section for monthly cash flows.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- end section -->
+	<!-- start footer -->
+	<footer>
+		<div class="container">
+			<div class="row">
+				<div class="span6 offset3">
+					<ul class="social-networks">
+						<li><a href="#"><i class="icon-circled icon-bgdark icon-instagram icon-2x"></i></a></li>
+						<li><a href="#"><i class="icon-circled icon-bgdark icon-twitter icon-2x"></i></a></li>
+						<li><a href="#"><i class="icon-circled icon-bgdark icon-dribbble icon-2x"></i></a></li>
+						<li><a href="#"><i class="icon-circled icon-bgdark icon-pinterest icon-2x"></i></a></li>
+					</ul>
+					<p class="copyright">
+						&copy; Thomas Stipanov. All rights reserved.
+						<div class="credits">
+							Boston University, MET CS 601 Final Project
+						</div>
+					</p>
+				</div>
+			</div>
+		</div>
+	</footer>
+	<!-- end footer -->
+	<a href="#" class="scrollup"><i class="icon-angle-up icon-square icon-bgdark icon-2x"></i></a>
+</body>
+</html>
